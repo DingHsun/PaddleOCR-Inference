@@ -110,9 +110,9 @@ body 格式不對時（例如送 JSON 或 form-data）server 會回 HTTP 400，�
 ## 模型選擇 (轉 .onnx)
 
 PP-OCR系列模型列表
+- [官方模型列表](http://www.paddleocr.ai/latest/version3.x/module_usage/module_overview.html)
 
-[https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/doc/doc_ch/models_list.md](http://www.paddleocr.ai/latest/version3.x/module_usage/module_overview.html)
-
+Python環境設定
 - python 3.10.10
 - pip install paddle2onnx-2.0.2rc3
 - 下載推理模型並解壓縮
