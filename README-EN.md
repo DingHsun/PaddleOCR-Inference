@@ -110,7 +110,7 @@ Placement path (same directory level as `vs2022/` and `cmake/`, at the project r
 ## Choosing a model (converting to .onnx)
 
 List of PP-OCR models
-- [Official model list](http://www.paddleocr.ai/latest/version3.x/module_usage/module_overview.html)
+- [Official model list](https://www.paddleocr.ai/latest/en/version3.x/module_usage/module_overview.html)
 
 Python environment setup
 - python 3.10.10
