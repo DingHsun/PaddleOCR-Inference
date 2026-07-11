@@ -129,8 +129,8 @@ Code to edit
 
 Example: PP-OCRv6_medium_rec
 
-1. Download the inference model and go through the .onnx conversion steps  [https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2]  
-   | [Model page](https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2) |
+1. Download the inference model and go through the .onnx conversion steps  [https://www.paddleocr.ai/latest/en/version3.x/module_usage/text_detection.html]  
+   | [Model page](https://www.paddleocr.ai/latest/en/version3.x/module_usage/text_detection.html) |
    | :---: |
    | <img width="1084" height="692" alt="image" src="https://github.com/user-attachments/assets/fd42b456-bf52-46bc-99ad-e248753c8c45" /> |  
 
