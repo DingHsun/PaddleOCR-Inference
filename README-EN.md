@@ -110,9 +110,9 @@ Placement path (same directory level as `vs2022/` and `cmake/`, at the project r
 ## Choosing a model (converting to .onnx)
 
 List of PP-OCR models
+- [Official model list](http://www.paddleocr.ai/latest/version3.x/module_usage/module_overview.html)
 
-[https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.7/doc/doc_ch/models_list.md](http://www.paddleocr.ai/latest/version3.x/module_usage/module_overview.html)
-
+Python environment setup
 - python 3.10.10
 - pip install paddle2onnx-2.0.2rc3
 - Download the inference model and unzip it
@@ -127,10 +127,14 @@ Code to edit
 
 ## Downloading the recognition dictionary
 
-Example: PP-OCRv6_medium_rec https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml
+Example: PP-OCRv6_medium_rec
 
-1. Download the inference model and go through the .onnx conversion steps
-   <img width="1084" height="692" alt="image" src="https://github.com/user-attachments/assets/b5f3e947-4b70-4580-9031-3656b2e57369" />
+1. Download the inference model and go through the .onnx conversion steps  [https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2]  
+   | [Model page](https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2) |
+   | :---: |
+   | <img width="1084" height="692" alt="image" src="https://github.com/user-attachments/assets/fd42b456-bf52-46bc-99ad-e248753c8c45" /> |  
 
-2. Find `character_dict_path` in the .yml file and download the dict.txt needed for recognition  
-   <img width="1113" height="766" alt="image" src="https://github.com/user-attachments/assets/a80119e7-5dca-47a5-80e2-ff2afa1f37a8" />
+2. Find `character_dict_path` in the .yml file and download the dict.txt needed for recognition  [https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml]  
+   | [File page](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml) |
+   | :---: |
+   | <img width="1113" height="766" alt="image" src="https://github.com/user-attachments/assets/a80119e7-5dca-47a5-80e2-ff2afa1f37a8" /> |
