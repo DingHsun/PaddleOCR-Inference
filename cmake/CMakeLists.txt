@@ -1,0 +1,59 @@
+cmake_minimum_required(VERSION 3.20)
+project(PaddleOCR-cpp LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+# Prebuilt third-party SDKs. Override with -DOPENCV_DIR=... / -DONNXRUNTIME_DIR=...
+# if you don't keep them under <repo>/packages (same layout the vs2022/ build uses).
+set(OPENCV_DIR "${REPO_ROOT}/packages/opencv/build" CACHE PATH "OpenCV (prebuilt Windows package) root")
+set(ONNXRUNTIME_DIR "${REPO_ROOT}/packages/onnxruntime-win-x64-gpu-1.21.0" CACHE PATH "ONNX Runtime GPU root")
+
+list(APPEND CMAKE_PREFIX_PATH "${OPENCV_DIR}")
+find_package(OpenCV REQUIRED)
+
+add_library(onnxruntime STATIC IMPORTED)
+set_target_properties(onnxruntime PROPERTIES
+    IMPORTED_LOCATION "${ONNXRUNTIME_DIR}/lib/onnxruntime.lib"
+    INTERFACE_INCLUDE_DIRECTORIES "${ONNXRUNTIME_DIR}/include"
+)
+
+# --- shared OCR core (text detection + recognition) -------------------------
+add_library(ocr_core STATIC
+    ${REPO_ROOT}/src/core/text_det.cpp
+    ${REPO_ROOT}/src/core/text_rec.cpp
+)
+target_include_directories(ocr_core PUBLIC ${REPO_ROOT}/src/core)
+target_link_libraries(ocr_core PUBLIC ${OpenCV_LIBS} onnxruntime)
+
+function(copy_runtime_assets target)
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${REPO_ROOT}/weights" "$<TARGET_FILE_DIR:${target}>/weights"
+        COMMAND ${CMAKE_COMMAND} -E copy "${OPENCV_DIR}/x64/vc15/bin/opencv_world450$<$<CONFIG:Debug>:d>.dll" "$<TARGET_FILE_DIR:${target}>"
+        COMMAND ${CMAKE_COMMAND} -E copy "${OPENCV_DIR}/x64/vc15/bin/opencv_videoio_ffmpeg450_64.dll" "$<TARGET_FILE_DIR:${target}>"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ONNXRUNTIME_DIR}/lib/onnxruntime.dll" "$<TARGET_FILE_DIR:${target}>"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ONNXRUNTIME_DIR}/lib/onnxruntime_providers_shared.dll" "$<TARGET_FILE_DIR:${target}>"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ONNXRUNTIME_DIR}/lib/onnxruntime_providers_cuda.dll" "$<TARGET_FILE_DIR:${target}>"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ONNXRUNTIME_DIR}/lib/onnxruntime_providers_tensorrt.dll" "$<TARGET_FILE_DIR:${target}>"
+        COMMAND_EXPAND_LISTS
+    )
+endfunction()
+
+# --- demo: interactive GUI console app --------------------------------------
+add_executable(demo ${REPO_ROOT}/src/demo/main.cpp)
+target_link_libraries(demo PRIVATE ocr_core)
+copy_runtime_assets(demo)
+add_custom_command(TARGET demo POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${REPO_ROOT}/images" "$<TARGET_FILE_DIR:demo>/images"
+)
+
+# --- api_server: headless OCR over HTTP (POST /ocr) -------------------------
+add_executable(api_server ${REPO_ROOT}/src/api_server/main.cpp)
+target_include_directories(api_server PRIVATE ${REPO_ROOT}/third_party)
+target_link_libraries(api_server PRIVATE ocr_core)
+if(WIN32)
+    target_link_libraries(api_server PRIVATE ws2_32)
+endif()
+copy_runtime_assets(api_server)

@@ -6,8 +6,8 @@
 #include <opencv2/highgui.hpp>
 //#include <cuda_provider_factory.h>
 #include <onnxruntime_cxx_api.h>
-#include "text_det.h"
-#include "text_rec.h"
+#include "../core/text_det.h"
+#include "../core/text_rec.h"
 
 using namespace cv;
 using namespace std;
@@ -19,7 +19,7 @@ int main()
 	TextDetector detect_model("weights/PP-OCRv6_medium_det_infer.onnx");
 	TextRecognizer rec_model("weights/en_PP-OCRv5_mobile_rec_infer.onnx", "weights/ppocrv5_en_dict.txt");
 
-	string imgpath = "images/test.bmp";
+	string imgpath = "images/test_detection.bmp";
 	Mat srcimg = imread(imgpath);
 
 	// test hole image

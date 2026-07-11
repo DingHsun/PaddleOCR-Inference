@@ -1,0 +1,17 @@
+# Third-party dependencies (not distributed with the repo)
+/packages/
+
+# Visual Studio build output
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+.vs/
+
+# CMake build output
+/cmake/build/
+/build/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake

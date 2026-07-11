@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{2f4c9c1a-6e3d-4a2e-9a3d-1b6c9f8e1d02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party">
+      <UniqueIdentifier>{2f4c9c1a-6e3d-4a2e-9a3d-1b6c9f8e1d03}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\api_server\main.cpp" />
+    <ClCompile Include="..\..\src\core\text_det.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\text_rec.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\core\text_det.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\text_rec.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\third_party\httplib.h">
+      <Filter>third_party</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
