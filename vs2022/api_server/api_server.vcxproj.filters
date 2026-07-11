@@ -27,5 +27,9 @@
     <ClInclude Include="..\..\third_party\httplib.h">
       <Filter>third_party</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="api_server.rc" />
   </ItemGroup>
 </Project>

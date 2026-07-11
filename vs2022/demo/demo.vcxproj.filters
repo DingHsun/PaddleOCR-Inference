@@ -21,5 +21,9 @@
     <ClInclude Include="..\..\src\core\text_rec.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="demo.rc" />
   </ItemGroup>
 </Project>
