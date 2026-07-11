@@ -127,10 +127,14 @@ PP-OCR系列模型列表
 
 ## 文字辨識文本下載
 
-範例：PP-OCRv6_medium_rec https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml
+範例：PP-OCRv6_medium_rec
 
-1. 下載推理模型並執行轉 .onnx 步驟
-   <img width="1084" height="692" alt="image" src="https://github.com/user-attachments/assets/b5f3e947-4b70-4580-9031-3656b2e57369" />
+1. 下載推理模型並執行轉 .onnx 步驟  [https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2]
+   | [模型網址](https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2) |
+   | :---: |
+   | <img width="1084" height="692" alt="image" src="https://github.com/user-attachments/assets/b5f3e947-4b70-4580-9031-3656b2e57369" /> |
 
-2. 尋找 .yml 檔案中的 character_dict_path 下載 recognition 需要的 dict.txt  
-   <img width="1113" height="766" alt="image" src="https://github.com/user-attachments/assets/a80119e7-5dca-47a5-80e2-ff2afa1f37a8" />
+2. 尋找 .yml 檔案中的 character_dict_path 下載 recognition 需要的 dict.txt  [https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml]
+   | [檔案網址](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml) |
+   | :---: |
+   | <img width="1113" height="766" alt="image" src="https://github.com/user-attachments/assets/a80119e7-5dca-47a5-80e2-ff2afa1f37a8" /> |
