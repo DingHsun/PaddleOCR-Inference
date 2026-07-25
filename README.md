@@ -18,7 +18,8 @@ PaddleOCR 的 C++ 推理實作，使用 onnxruntime 與 opencv，可運行 Windo
 src/
   core/        text_det / text_rec 共用 OCR 邏輯 (demo 與 api_server 共用同一份)
   demo/        main.cpp - GUI 互動式 demo
-  api_server/  main.cpp - HTTP API server (POST /ocr)
+  api_server/  main.cpp - HTTP API server (POST /ocr_detect, POST /ocr_recognize)
+frontend/      Vue 3 + Vite 網頁前端，build 完由 api_server 一起服務（見下方）
 weights/       onnx 模型與字典 (demo、api_server 共用)
 images/        測試圖片 (僅 demo 使用)
 third_party/   httplib.h (api_server 用的單一標頭 HTTP 函式庫)
@@ -96,6 +97,27 @@ body 格式不對時（例如送 JSON 或 form-data）server 會回 HTTP 400，�
   "hint": "body must be the raw image bytes (jpg/png/bmp/...), not form-data or base64, e.g. curl -H \"Content-Type: application/octet-stream\" --data-binary @file.jpg"
 }
 ```
+
+## 前端 (frontend)
+
+`frontend/` 是一個 Vue 3 + Vite 網頁，提供選圖片 + Detect/Recognize 按鈕（畫面上會把偵測到的文字框疊在圖片上）。它不是獨立的 web app——build 出來的靜態檔案由 `api_server` 用 httplib 的 `set_mount_point()` 一起服務，同一個 port 就能連到網頁跟 API，不用另外架站、也不用處理 CORS。
+
+**開發時**（前後端分開跑，方便改介面即時看到變化）：
+```bash
+cd frontend
+npm install
+npm run dev
+```
+`vite.config.js` 已經設定 dev proxy，把 `/health`、`/ocr_detect`、`/ocr_recognize` 轉發到 `http://127.0.0.1:8080`（`api_server.exe` 要先另外啟動），瀏覽器連 Vite 印出來的網址（預設 `http://localhost:5173`）就能用。
+
+**要讓 `api_server.exe` 自己就能服務網頁**（正式使用/打包時）：
+```bash
+cd frontend
+npm run build
+```
+會產生 `frontend/dist`。之後編譯 `api_server`（VS2022 或 CMake）時，build script 會自動把 `frontend/dist` 複製到輸出目錄旁邊；`api_server.exe` 啟動後直接用瀏覽器連 `http://127.0.0.1:8080/` 就會看到網頁介面，不需要另外開 `npm run dev`。
+
+> 注意：如果是用 CMake，`frontend/dist` 要在**第一次 `cmake` configure 之前**先 build 好，這個複製步驟才會被加進 build 流程；先 build 前端、之後才 build C++ 專案的順序照做就沒問題。
 
 ## C++ Packages
 
