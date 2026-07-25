@@ -68,6 +68,7 @@ int main(int argc, char** argv)
 	string rec_model_path = "weights/en_PP-OCRv5_mobile_rec_infer.onnx";
 	string rec_dict_path = "weights/ppocrv5_en_dict.txt";
 	string host = "0.0.0.0";
+	string local = "127.0.0.1";
 	int port = 8080;
 	if (argc > 1) host = argv[1];
 	if (argc > 2) port = atoi(argv[2]);
@@ -144,6 +145,7 @@ int main(int argc, char** argv)
 	});
 
 	cout << "PaddleOCR API server listening on " << host << ":" << port << endl;
+	cout << "PaddleOCR API server listening on " << local << ":" << port << endl;
 	svr.listen(host.c_str(), port);
 	return 0;
 }
