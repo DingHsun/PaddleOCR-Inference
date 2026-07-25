@@ -101,7 +101,7 @@ start "" /D "$(SolutionDir).." "$(TargetPath)"</Command>
 exit /b 0</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)copy_bin.bat" "$(TargetDir)" "$(PlatformName)" "$(ConfigurationName)"
+      <Command>call "$(SolutionDir)copy_bin.bat" "$(TargetDir)" $(PlatformName) $(ConfigurationName)
 start "" /D "$(SolutionDir).." "$(TargetPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
