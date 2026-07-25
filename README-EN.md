@@ -29,7 +29,7 @@ packages/      opencv / onnxruntime third-party SDKs (download yourself, not ver
 
 ## Building
 
-**Visual Studio 2022**: open `vs2022/PaddleOCR-cpp.slnx`, set `api_server` as the startup project, and hit F5. Or just run `vs2022/build_and_run.bat`, which builds and launches it without opening the VS GUI.
+**Visual Studio 2022**: open `vs2022/PaddleOCR-cpp.slnx`, set `api_server` as the startup project, and hit F5. `api_server.exe` launches automatically after building (see the Post-Build Event in `api_server.vcxproj`).
 
 **VSCode / CMake**: install the CMake Tools extension, open the folder, and configure using `cmake/CMakeLists.txt`; this produces the `api_server` target. The opencv/onnxruntime paths default to the folders under `packages/`, and can be overridden with `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...`.
 

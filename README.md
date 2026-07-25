@@ -29,7 +29,7 @@ packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版�
 
 ## 建置方式
 
-**Visual Studio 2022**：開啟 `vs2022/PaddleOCR-cpp.slnx`，設 `api_server` 為啟動專案即可 F5；或直接執行 `vs2022/build_and_run.bat` 建置並啟動（不用開 VS GUI）。
+**Visual Studio 2022**：開啟 `vs2022/PaddleOCR-cpp.slnx`，設 `api_server` 為啟動專案即可 F5；建置完會自動啟動 `api_server.exe`（見 `api_server.vcxproj` 的 Post-Build Event）。
 
 **VSCode / CMake**：安裝 CMake Tools 擴充套件，開啟資料夾後選擇 `cmake/CMakeLists.txt` 設定，會產生 `api_server` target。opencv/onnxruntime 路徑預設抓 `packages/` 下的資料夾，也可用 `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...` 覆寫。
 
