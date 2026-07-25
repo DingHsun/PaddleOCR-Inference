@@ -78,6 +78,15 @@ int main(int argc, char** argv)
 
 	httplib::Server svr;
 
+	// Serve the built Vue frontend (see frontend/README) from the same exe/port.
+	// `npm run build` in frontend/ produces frontend/dist; run that before this
+	// picks it up. /ocr_detect, /ocr_recognize, /health below still take priority
+	// over static files with the same path.
+	if (!svr.set_mount_point("/", "frontend/dist"))
+	{
+		cout << "warning: frontend/dist not found, web UI will not be served" << endl;
+	}
+
 	svr.Get("/health", [](const httplib::Request&, httplib::Response& res) {
 		res.set_content("{\"status\":\"ok\"}", "application/json");
 	});

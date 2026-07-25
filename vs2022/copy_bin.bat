@@ -56,5 +56,12 @@ xcopy "%ONNX_LIB_DIR%\onnxruntime_providers_tensorrt.dll"   "%DestinationPath%\"
 xcopy "%SolutionDir%..\weights" "%DestinationPath%\weights" /E /I /Y
 xcopy "%SolutionDir%..\images"  "%DestinationPath%\images"  /E /I /Y
 
+:: ─────────────────────────────────────────────────────────────────────
+:: 4. 複製前端 build 結果（api_server 用；先在 frontend/ 執行 npm run build）
+:: ─────────────────────────────────────────────────────────────────────
+if exist "%SolutionDir%..\frontend\dist" (
+    xcopy "%SolutionDir%..\frontend\dist" "%DestinationPath%\frontend\dist" /E /I /Y
+)
+
 echo ------ 結束複製 ------
 exit /B 0

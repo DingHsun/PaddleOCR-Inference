@@ -49,7 +49,7 @@ add_custom_command(TARGET demo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${REPO_ROOT}/images" "$<TARGET_FILE_DIR:demo>/images"
 )
 
-# --- api_server: headless OCR over HTTP (POST /ocr) -------------------------
+# --- api_server: headless OCR over HTTP (POST /ocr_detect, POST /ocr_recognize) ---
 add_executable(api_server ${REPO_ROOT}/src/api_server/main.cpp)
 target_include_directories(api_server PRIVATE ${REPO_ROOT}/third_party)
 target_link_libraries(api_server PRIVATE ocr_core)
@@ -57,3 +57,11 @@ if(WIN32)
     target_link_libraries(api_server PRIVATE ws2_32)
 endif()
 copy_runtime_assets(api_server)
+
+# Ship the built Vue frontend (frontend/dist) next to api_server, if it's been
+# built (`npm run build` in frontend/). api_server serves it via set_mount_point.
+if(EXISTS "${REPO_ROOT}/frontend/dist")
+    add_custom_command(TARGET api_server POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${REPO_ROOT}/frontend/dist" "$<TARGET_FILE_DIR:api_server>/frontend/dist"
+    )
+endif()
