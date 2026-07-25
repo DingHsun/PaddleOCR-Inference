@@ -22,7 +22,7 @@ const selectedBoxId = ref(null)
 const detecting = ref(false)
 const recognizing = ref(false)
 const errorMsg = ref('')
-const recognizedText = ref('')
+const recognizedText = ref(null) // null = nothing run yet; '' = ran but found no text
 const detectStatus = ref('')
 const dropActive = ref(false)
 
@@ -49,7 +49,7 @@ function loadFile(file) {
   redBoxes.value = []
   selectedBoxId.value = null
   detectStatus.value = ''
-  recognizedText.value = ''
+  recognizedText.value = null
   errorMsg.value = ''
 }
 
@@ -324,10 +324,11 @@ onUnmounted(() => window.removeEventListener('resize', draw))
 
       <p v-if="detectStatus" class="status">{{ detectStatus }}</p>
 
-      <div v-if="recognizedText || errorMsg" class="results">
-        <div v-if="recognizedText" class="result-box">
+      <div v-if="recognizedText !== null || errorMsg" class="results">
+        <div v-if="recognizedText !== null" class="result-box" :class="{ warn: !recognizedText }">
           <span class="result-label">Recognized text</span>
-          <p class="result-text">{{ recognizedText }}</p>
+          <p v-if="recognizedText" class="result-text">{{ recognizedText }}</p>
+          <p v-else class="result-text warn-text">⚠ No text recognized in the selected region.</p>
         </div>
         <div v-if="errorMsg" class="error-box">{{ errorMsg }}</div>
       </div>
@@ -531,6 +532,25 @@ h1 {
   margin: 0;
   font-size: 1.05rem;
   word-break: break-word;
+}
+
+.result-box.warn {
+  border-color: #fcd34d;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.warn-text {
+  color: #b45309;
+}
+
+@media (prefers-color-scheme: dark) {
+  .result-box.warn {
+    border-color: #78350f;
+    background: rgba(245, 158, 11, 0.12);
+  }
+  .warn-text {
+    color: #fcd34d;
+  }
 }
 
 .error-box {
