@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
-project(PaddleOCR-cpp LANGUAGES CXX)
+project(PaddleOCR-cpp VERSION 1.0.1 LANGUAGES CXX)
+
+if(WIN32)
+    enable_language(RC)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -52,6 +56,11 @@ target_include_directories(api_server PRIVATE ${REPO_ROOT}/third_party)
 target_link_libraries(api_server PRIVATE ocr_core)
 if(WIN32)
     target_link_libraries(api_server PRIVATE ws2_32)
+    # Reuse the same version resource as the vs2022/ build (single source of
+    # truth for FILEVERSION/PRODUCTVERSION -- edit it via VS's Resource
+    # Editor, both build systems then embed the same version info).
+    target_sources(api_server PRIVATE ${REPO_ROOT}/vs2022/api_server/api_server.rc)
+    target_include_directories(api_server PRIVATE ${REPO_ROOT}/vs2022/api_server)
 endif()
 copy_runtime_assets(api_server)
 
