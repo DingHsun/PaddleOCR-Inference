@@ -51,10 +51,9 @@ xcopy "%ONNX_LIB_DIR%\onnxruntime_providers_shared.dll"     "%DestinationPath%\"
 xcopy "%ONNX_LIB_DIR%\onnxruntime_providers_tensorrt.dll"   "%DestinationPath%\" /d /y /q
 
 :: ─────────────────────────────────────────────────────────────────────
-:: 3. 複製 weights 與 images（demo/api_server 共用）
+:: 3. 複製 weights
 :: ─────────────────────────────────────────────────────────────────────
 xcopy "%SolutionDir%..\weights" "%DestinationPath%\weights" /E /I /Y
-xcopy "%SolutionDir%..\images"  "%DestinationPath%\images"  /E /I /Y
 
 :: ─────────────────────────────────────────────────────────────────────
 :: 4. 複製前端 build 結果（api_server 用；先在 frontend/ 執行 npm run build）

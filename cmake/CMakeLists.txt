@@ -41,14 +41,6 @@ function(copy_runtime_assets target)
     )
 endfunction()
 
-# --- demo: interactive GUI console app --------------------------------------
-add_executable(demo ${REPO_ROOT}/src/demo/main.cpp)
-target_link_libraries(demo PRIVATE ocr_core)
-copy_runtime_assets(demo)
-add_custom_command(TARGET demo POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${REPO_ROOT}/images" "$<TARGET_FILE_DIR:demo>/images"
-)
-
 # --- api_server: headless OCR over HTTP (POST /ocr_detect, POST /ocr_recognize) ---
 add_executable(api_server ${REPO_ROOT}/src/api_server/main.cpp)
 target_include_directories(api_server PRIVATE ${REPO_ROOT}/third_party)

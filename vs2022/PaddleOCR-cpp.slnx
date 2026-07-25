@@ -2,6 +2,5 @@
   <Configurations>
     <Platform Name="x64" />
   </Configurations>
-  <Project Path="demo/demo.vcxproj" Id="e6a62e08-6ca8-44df-adcd-a6400bddc586" />
   <Project Path="api_server/api_server.vcxproj" Id="af145de5-ce62-4292-8ceb-e42a70eb01ea" />
 </Solution>
