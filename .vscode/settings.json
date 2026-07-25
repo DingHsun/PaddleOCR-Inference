@@ -1,4 +1,7 @@
 {
     "cmake.sourceDirectory": "${workspaceFolder}/cmake",
-    "cmake.buildDirectory": "${workspaceFolder}/cmake/build"
+    "cmake.buildDirectory": "${workspaceFolder}/cmake/build",
+    "files.readonlyInclude": {
+        "third_party/**": true
+    }
 }
