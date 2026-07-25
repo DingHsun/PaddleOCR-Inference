@@ -11,7 +11,12 @@ set(REPO_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(OPENCV_DIR "${REPO_ROOT}/packages/opencv/build" CACHE PATH "OpenCV (prebuilt Windows package) root")
 set(ONNXRUNTIME_DIR "${REPO_ROOT}/packages/onnxruntime-win-x64-gpu-1.21.0" CACHE PATH "ONNX Runtime GPU root")
 
-list(APPEND CMAKE_PREFIX_PATH "${OPENCV_DIR}")
+# The top-level OpenCVConfig.cmake tries to auto-detect the MSVC runtime
+# folder (vc14/vc15/vc16) from MSVC_VERSION, but this prebuilt package
+# predates VS2022 (MSVC 19.3x+) so that detection fails and OpenCV_FOUND
+# comes back FALSE. Point straight at the vc15 config instead, which
+# doesn't need that detection and works fine with the VS2022 compiler.
+set(OpenCV_DIR "${OPENCV_DIR}/x64/vc15/lib")
 find_package(OpenCV REQUIRED)
 
 add_library(onnxruntime STATIC IMPORTED)
