@@ -12,6 +12,10 @@ A C++ inference implementation of PaddleOCR using onnxruntime and opencv, runnab
 - An HTTP API (`POST /ocr_detect`, `POST /ocr_recognize`) for other services to call
 - A built-in web UI (see Frontend below) — open it in a browser to try OCR on an image
 
+## Demo
+
+https://github.com/user-attachments/assets/414e5c84-196c-43d8-9eb9-01a9a815db8f
+
 ## Project layout
 
 ```
