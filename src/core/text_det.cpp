@@ -1,4 +1,4 @@
-#include"text_det.h"
+#include "text_det.h"
 
 TextDetector::TextDetector(string model_path)
 {
@@ -8,7 +8,7 @@ TextDetector::TextDetector(string model_path)
 	this->maxCandidates = 1000;
 
 	std::wstring widestr = std::wstring(model_path.begin(), model_path.end());
-	//OrtStatus* status = OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions, 0);  ////gpu
+	// OrtStatus* status = OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions, 0);  ////gpu
 	sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
 	net = new Session(env, widestr.c_str(), sessionOptions);
 	size_t numInputNodes = net->GetInputCount();
@@ -74,13 +74,13 @@ void TextDetector::normalize_(Mat img)
 	}
 }
 
-vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
+vector<vector<Point2f>> TextDetector::detect(Mat &srcimg)
 {
 	int h = srcimg.rows;
 	int w = srcimg.cols;
 	Mat dstimg = this->preprocess(srcimg);
 	this->normalize_(dstimg);
-	array<int64_t, 4> input_shape_{ 1, 3, dstimg.rows, dstimg.cols };
+	array<int64_t, 4> input_shape_{1, 3, dstimg.rows, dstimg.cols};
 
 	auto allocator_info = MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
 	Value input_tensor_ = Value::CreateTensor<float>(allocator_info, input_image_.data(), input_image_.size(), input_shape_.data(), input_shape_.size());
@@ -93,23 +93,25 @@ vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
 
 	// 3. ✨ 修正：使用你擁有的 GetTensorMemoryInfo 取得記憶體資訊指標
 	// 注意：因為它回傳的是 const OrtMemoryInfo*，我們可以直接拿去餵給 BindOutput
-	const OrtMemoryInfo* memory_info = input_tensor_.GetTensorMemoryInfo();
+	const OrtMemoryInfo *memory_info = input_tensor_.GetTensorMemoryInfo();
 
-	for (const auto& out_name : output_names) {
+	for (const auto &out_name : output_names)
+	{
 		// 改用 BindOutput 的基本多載，傳入輸出名稱與指定的記憶體資訊
 		io_binding.BindOutput(out_name.c_str(), memory_info);
 	}
 
 	// 4. 呼叫 1.21.0 的 2 參數 Run 函式
-	net->Run(Ort::RunOptions{ nullptr }, io_binding);
+	net->Run(Ort::RunOptions{nullptr}, io_binding);
 
 	// 5. 取出結果
 	std::vector<Ort::Value> ort_outputs = io_binding.GetOutputValues();
 
-	const float* floatArray = ort_outputs[0].GetTensorMutableData<float>();
+	const float *floatArray = ort_outputs[0].GetTensorMutableData<float>();
 	std::vector<int64_t> out_shape = ort_outputs.at(0).GetTensorTypeAndShapeInfo().GetShape();
 	int64_t outputCount = 1;
-	for (int64_t dim : out_shape) outputCount *= dim;
+	for (int64_t dim : out_shape)
+		outputCount *= dim;
 
 	// Size binary from the model's actual output shape, not from
 	// dstimg.rows/cols: preprocess()'s resize-to-multiple-of-32 rounding
@@ -130,28 +132,29 @@ vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
 	float scaleHeight = (float)(h) / (float)(binary.size[0]);
 	float scaleWidth = (float)(w) / (float)(binary.size[1]);
 	// Find contours
-	vector< vector<Point> > contours;
+	vector<vector<Point>> contours;
 	bitmap.convertTo(bitmap, CV_8UC1);
 	findContours(bitmap, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
 	// Candidate number limitation
 	size_t numCandidate = min(contours.size(), (size_t)(maxCandidates > 0 ? maxCandidates : INT_MAX));
 	vector<float> confidences;
-	vector< vector<Point2f> > results;
+	vector<vector<Point2f>> results;
 	for (size_t i = 0; i < numCandidate; i++)
 	{
-		vector<Point>& contour = contours[i];
+		vector<Point> &contour = contours[i];
 
 		// Calculate text contour score
 		if (contourScore(binary, contour) < polygonThreshold)
 			continue;
 
 		// Rescale
-		vector<Point> contourScaled; contourScaled.reserve(contour.size());
+		vector<Point> contourScaled;
+		contourScaled.reserve(contour.size());
 		for (size_t j = 0; j < contour.size(); j++)
 		{
 			contourScaled.push_back(Point(int(contour[j].x * scaleWidth),
-				int(contour[j].y * scaleHeight)));
+										  int(contour[j].y * scaleHeight)));
 		}
 
 		// Unclip
@@ -163,11 +166,11 @@ vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
 		}
 
 		// minArea() rect is not normalized, it may return rectangles with angle=-90 or height < width
-		const float angle_threshold = 60;  // do not expect vertical text, TODO detection algo property
+		const float angle_threshold = 60; // do not expect vertical text, TODO detection algo property
 		bool swap_size = false;
-		if (box.size.width < box.size.height)  // horizontal-wide text area is expected
+		if (box.size.width < box.size.height) // horizontal-wide text area is expected
 			swap_size = true;
-		else if (fabs(box.angle) >= angle_threshold)  // don't work with vertical rectangles
+		else if (fabs(box.angle) >= angle_threshold) // don't work with vertical rectangles
 			swap_size = true;
 		if (swap_size)
 		{
@@ -179,7 +182,7 @@ vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
 		}
 
 		Point2f vertex[4];
-		box.points(vertex);  // order: bl, tl, tr, br
+		box.points(vertex); // order: bl, tl, tr, br
 		vector<Point2f> approx;
 		for (int j = 0; j < 4; j++)
 			approx.emplace_back(vertex[j]);
@@ -201,9 +204,9 @@ vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
 	return order_points;*/
 }
 
-vector< vector<Point2f> > TextDetector::order_points_clockwise(vector< vector<Point2f> > results)
+vector<vector<Point2f>> TextDetector::order_points_clockwise(vector<vector<Point2f>> results)
 {
-	vector< vector<Point2f> > order_points(results);
+	vector<vector<Point2f>> order_points(results);
 	for (int i = 0; i < results.size(); i++)
 	{
 		float max_sum_pts = -10000;
@@ -254,7 +257,7 @@ vector< vector<Point2f> > TextDetector::order_points_clockwise(vector< vector<Po
 	return order_points;
 }
 
-void TextDetector::draw_pred(Mat& srcimg, vector< vector<Point2f> > results)
+void TextDetector::draw_pred(Mat &srcimg, vector<vector<Point2f>> results)
 {
 	for (int i = 0; i < results.size(); i++)
 	{
@@ -273,7 +276,7 @@ void TextDetector::draw_pred(Mat& srcimg, vector< vector<Point2f> > results)
 	}
 }
 
-float TextDetector::contourScore(const Mat& binary, const vector<Point>& contour)
+float TextDetector::contourScore(const Mat &binary, const vector<Point> &contour)
 {
 	Rect rect = boundingRect(contour);
 	int xmin = max(rect.x, 0);
@@ -285,17 +288,18 @@ float TextDetector::contourScore(const Mat& binary, const vector<Point>& contour
 
 	Mat mask = Mat::zeros(ymax - ymin + 1, xmax - xmin + 1, CV_8U);
 	vector<Point> roiContour;
-	for (size_t i = 0; i < contour.size(); i++) {
+	for (size_t i = 0; i < contour.size(); i++)
+	{
 		Point pt = Point(contour[i].x - xmin, contour[i].y - ymin);
 		roiContour.push_back(pt);
 	}
-	vector<vector<Point>> roiContours = { roiContour };
+	vector<vector<Point>> roiContours = {roiContour};
 	fillPoly(mask, roiContours, Scalar(1));
 	float score = mean(binROI, mask).val[0];
 	return score;
 }
 
-void TextDetector::unclip(const vector<Point2f>& inPoly, vector<Point2f>& outPoly)
+void TextDetector::unclip(const vector<Point2f> &inPoly, vector<Point2f> &outPoly)
 {
 	float area = contourArea(inPoly);
 	float length = arcLength(inPoly, true);
@@ -336,7 +340,7 @@ void TextDetector::unclip(const vector<Point2f>& inPoly, vector<Point2f>& outPol
 		else
 		{
 			float denom = a.x * (float)(d.y - c.y) + b.x * (float)(c.y - d.y) +
-				d.x * (float)(b.y - a.y) + c.x * (float)(a.y - b.y);
+						  d.x * (float)(b.y - a.y) + c.x * (float)(a.y - b.y);
 			float num = a.x * (float)(d.y - c.y) + c.x * (float)(a.y - d.y) + d.x * (float)(c.y - a.y);
 			float s = num / denom;
 
@@ -347,19 +351,23 @@ void TextDetector::unclip(const vector<Point2f>& inPoly, vector<Point2f>& outPol
 	}
 }
 
-Mat TextDetector::get_rotate_crop_image(const Mat& frame, vector<Point2f> vertices)
+Mat TextDetector::get_rotate_crop_image(const Mat &frame, vector<Point2f> vertices)
 {
 	Rect rect = boundingRect(Mat(vertices));
-	if (rect.x < 0) rect.x = 0;
-	if (rect.x + rect.width > frame.cols) rect.x = frame.cols - rect.width;
-	if (rect.y < 0) rect.y = 0;
-	if (rect.y + rect.height > frame.rows) rect.y = frame.rows - rect.height;
+	if (rect.x < 0)
+		rect.x = 0;
+	if (rect.x + rect.width > frame.cols)
+		rect.x = frame.cols - rect.width;
+	if (rect.y < 0)
+		rect.y = 0;
+	if (rect.y + rect.height > frame.rows)
+		rect.y = frame.rows - rect.height;
 	Mat crop_img = frame(rect);
 
 	const Size outputSize = Size(rect.width, rect.height);
 
-	vector<Point2f> targetVertices{ Point2f(0, outputSize.height),Point2f(0, 0), Point2f(outputSize.width, 0), Point2f(outputSize.width, outputSize.height) };
-	//vector<Point2f> targetVertices{ Point2f(0, 0), Point2f(outputSize.width, 0), Point2f(outputSize.width, outputSize.height), Point2f(0, outputSize.height) };
+	vector<Point2f> targetVertices{Point2f(0, outputSize.height), Point2f(0, 0), Point2f(outputSize.width, 0), Point2f(outputSize.width, outputSize.height)};
+	// vector<Point2f> targetVertices{ Point2f(0, 0), Point2f(outputSize.width, 0), Point2f(outputSize.width, outputSize.height), Point2f(0, outputSize.height) };
 
 	for (int i = 0; i < 4; i++)
 	{
