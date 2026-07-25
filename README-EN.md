@@ -29,11 +29,23 @@ packages/      opencv / onnxruntime third-party SDKs (download yourself, not ver
 
 ## Building
 
-**Visual Studio 2022**: open `vs2022/PaddleOCR-cpp.slnx`, set `api_server` as the startup project, and hit F5. `api_server.exe` launches automatically after building (see the Post-Build Event in `api_server.vcxproj`).
+### Visual Studio 2022
 
-**VSCode / CMake**: install the CMake Tools extension, open the folder, and configure using `cmake/CMakeLists.txt`; this produces the `api_server` target. The opencv/onnxruntime paths default to the folders under `packages/`, and can be overridden with `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...`.
+Open `vs2022/PaddleOCR-cpp.slnx`, right-click the `api_server` project in Solution Explorer → **Rebuild** (or just Build).
 
-Both build methods automatically copy the opencv/onnxruntime DLLs and `weights/` into the output directory after building.
+Building it automatically triggers (configured in `api_server.vcxproj`):
+1. **Pre-Build Event**: `taskkill`s any still-running `api_server.exe` (otherwise the linker fails because the exe file is locked)
+2. Compilation
+3. **Post-Build Event**: runs `copy_bin.bat`, which copies the opencv/onnxruntime DLLs and `weights/` (and `frontend/dist`, if it exists) into the output directory `vs2022/x64/<Debug|Release>/`, then `start`s the freshly built `api_server.exe`
+
+So whether you Rebuild or hit F5, `api_server.exe` pops up running on its own after the build — no need to hunt down the exe and launch it manually.
+
+### VSCode / CMake
+
+1. Install the **CMake Tools** extension (and the **C/C++** extension if you want to debug), then open this repo folder — `.vscode/settings.json` already sets `cmake.sourceDirectory` to `cmake/`, so it picks up `cmake/CMakeLists.txt` automatically.
+2. **Pick a build variant (Debug/Release)**: the VSCode status bar has a button showing the current variant (e.g. `[Debug]`) — click it to choose Debug; or `Ctrl+Shift+P` → **CMake: Select Variant**. Pick **Debug** if you plan to debug — `launch.json` points at the Debug build's exe specifically.
+3. Run **CMake: Build** (or the build button in the status bar). This produces `cmake/build/Debug/api_server.exe` and automatically copies the opencv/onnxruntime DLLs, `weights/` (and `frontend/dist`, if present) into the same folder. The opencv/onnxruntime paths default to the folders under `packages/`, and can be overridden with `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...`.
+4. **Debugging**: hit **F5** — it uses the project's `.vscode/launch.json` directly (`cppvsdbg`, matching the PDBs MSVC produces), so you won't see the "Select debugger" picker, and breakpoints work normally.
 
 ## Using api_server
 

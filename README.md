@@ -29,11 +29,23 @@ packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版�
 
 ## 建置方式
 
-**Visual Studio 2022**：開啟 `vs2022/PaddleOCR-cpp.slnx`，設 `api_server` 為啟動專案即可 F5；建置完會自動啟動 `api_server.exe`（見 `api_server.vcxproj` 的 Post-Build Event）。
+### Visual Studio 2022
 
-**VSCode / CMake**：安裝 CMake Tools 擴充套件，開啟資料夾後選擇 `cmake/CMakeLists.txt` 設定，會產生 `api_server` target。opencv/onnxruntime 路徑預設抓 `packages/` 下的資料夾，也可用 `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...` 覆寫。
+開啟 `vs2022/PaddleOCR-cpp.slnx`，在方案總管對 `api_server` 專案按右鍵 → **重建(Rebuild)**（或直接建置）。
 
-兩種方式都會在編譯後自動把 opencv/onnxruntime 的 DLL 與 `weights/` 複製到輸出目錄。
+建置完成會自動觸發（設定在 `api_server.vcxproj` 裡）：
+1. **Pre-Build Event**：`taskkill` 關掉還在跑的舊 `api_server.exe`（避免 exe 檔案被佔用導致 link 失敗）
+2. 編譯
+3. **Post-Build Event**：呼叫 `copy_bin.bat`，把 opencv/onnxruntime 的 DLL 跟 `weights/`（如果 `frontend/dist` 存在也一併）複製到輸出目錄 `vs2022/x64/<Debug|Release>/`，接著自動 `start` 啟動剛編譯好的 `api_server.exe`
+
+也就是不管按重建方案還是直接 F5，建置完 `api_server.exe` 就會自己彈出來跑，不用手動找 exe 執行。
+
+### VSCode / CMake
+
+1. 安裝 **CMake Tools** 擴充套件（要偵錯的話還要裝 **C/C++** 擴充套件），開啟這個 repo 資料夾——`.vscode/settings.json` 已經設定 `cmake.sourceDirectory` 指向 `cmake/`，會自動抓到 `cmake/CMakeLists.txt`。
+2. **選組態（Debug/Release）**：VSCode 下方狀態列會有一個顯示目前組態的按鈕（例如 `[Debug]`），點它選 Debug；或 `Ctrl+Shift+P` → **CMake: Select Variant**。要偵錯的話**一定要選 Debug**，因為 `launch.json` 是寫死指向 Debug 版本的 exe。
+3. 執行 **CMake: Build**（或狀態列的建置按鈕），會產生 `cmake/build/Debug/api_server.exe`，並自動複製 opencv/onnxruntime DLL、`weights/`（`frontend/dist` 有的話也會複製）到同一個資料夾。opencv/onnxruntime 路徑預設抓 `packages/` 下的資料夾，也可用 `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...` 覆寫。
+4. **偵錯**：按 **F5**，會直接套用專案裡的 `.vscode/launch.json`（`cppvsdbg` debugger，對應 MSVC 編譯出的 pdb），不會再跳「Select debugger」的選單，中斷點可以正常打。
 
 ## api_server 使用方式
 
