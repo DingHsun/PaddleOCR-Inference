@@ -1,6 +1,9 @@
 @echo off
 :: =====================================================================
-:: 建置 api_server 並直接執行
+:: 建置 api_server（不用開 VS GUI）
+:: api_server.vcxproj 自己的 Pre/Post-Build Event 會負責關閉舊的
+:: api_server.exe、複製相依 DLL、以及建置完自動啟動新的 exe，
+:: 這支腳本本身不再另外啟動一次，避免啟動兩份搶同一個 port。
 :: 用法：build_and_run.bat [Debug|Release]
 :: 預設：build_and_run.bat Debug
 :: =====================================================================
@@ -12,7 +15,6 @@ set CONFIG=%1
 if "%CONFIG%"=="" set CONFIG=Debug
 
 set SCRIPT_DIR=%~dp0
-set REPO_ROOT=%SCRIPT_DIR%..
 
 for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe`) do set MSBUILD=%%i
 
@@ -34,7 +36,6 @@ if not exist "%EXE%" (
     exit /b 1
 )
 
-echo ------ 啟動 %TARGET%.exe (工作目錄=%REPO_ROOT%) ------
-start "" /D "%REPO_ROOT%" "%EXE%"
+echo ------ 建置完成，%TARGET%.exe 已由 Post-Build Event 自動啟動 ------
 
 endlocal
