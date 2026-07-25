@@ -12,6 +12,10 @@ PaddleOCR 的 C++ 推理實作，使用 onnxruntime 與 opencv，可運行 Windo
 - HTTP API（`POST /ocr_detect`、`POST /ocr_recognize`）給其他服務呼叫
 - 內建的網頁介面（見下方「前端」），瀏覽器連上去就能選圖片測試
 
+## Demo
+
+https://github.com/user-attachments/assets/414e5c84-196c-43d8-9eb9-01a9a815db8f
+
 ## 專案結構
 
 ```
