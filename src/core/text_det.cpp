@@ -107,15 +107,21 @@ vector< vector<Point2f> > TextDetector::detect(Mat& srcimg)
 	std::vector<Ort::Value> ort_outputs = io_binding.GetOutputValues();
 
 	const float* floatArray = ort_outputs[0].GetTensorMutableData<float>();
-	int outputCount = 1;
-	for (int i = 0; i < ort_outputs.at(0).GetTensorTypeAndShapeInfo().GetShape().size(); i++)
-	{
-		int dim = ort_outputs.at(0).GetTensorTypeAndShapeInfo().GetShape().at(i);
-		outputCount *= dim;
-	}
+	std::vector<int64_t> out_shape = ort_outputs.at(0).GetTensorTypeAndShapeInfo().GetShape();
+	int64_t outputCount = 1;
+	for (int64_t dim : out_shape) outputCount *= dim;
 
-	Mat binary(dstimg.rows, dstimg.cols, CV_32FC1);
-	memcpy(binary.data, floatArray, outputCount * sizeof(float));
+	// Size binary from the model's actual output shape, not from
+	// dstimg.rows/cols: preprocess()'s resize-to-multiple-of-32 rounding
+	// can end up a pixel off from what the model actually produced, and
+	// memcpy'ing outputCount floats into a Mat sized off dstimg's
+	// dimensions could then write past the end of its buffer (heap
+	// corruption / access violation crash).
+	int outH = out_shape.size() >= 2 ? (int)out_shape[out_shape.size() - 2] : dstimg.rows;
+	int outW = out_shape.size() >= 1 ? (int)out_shape[out_shape.size() - 1] : dstimg.cols;
+	Mat binary(outH, outW, CV_32FC1);
+	size_t copyBytes = std::min((size_t)outputCount * sizeof(float), binary.total() * binary.elemSize());
+	memcpy(binary.data, floatArray, copyBytes);
 
 	// Threshold
 	Mat bitmap;
