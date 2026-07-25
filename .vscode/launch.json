@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "api_server (CMake Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake/build/Debug/api_server.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/cmake/build/Debug",
+            "console": "integratedTerminal"
+        }
+    ]
+}
