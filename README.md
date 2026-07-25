@@ -8,33 +8,32 @@ PaddleOCR 的 C++ 推理實作，使用 onnxruntime 與 opencv，可運行 Windo
 1. 全圖識別（文字位置＋文字內容）
 2. 選擇 ROI 範圍進行辨識
 
-**提供兩種執行方式**
-1. `demo` - 有 GUI 視窗、可框選 ROI 的互動式主程式，適合用 Visual Studio 直接按 F5 呼叫 main() 測試
-2. `api_server` - 無 GUI 的常駐 exe，啟動後開 HTTP API（`POST /ocr_detect`、`POST /ocr_recognize`），方便其他服務用 API 呼叫辨識結果
+`api_server` 是一個常駐 exe，同時提供：
+- HTTP API（`POST /ocr_detect`、`POST /ocr_recognize`）給其他服務呼叫
+- 內建的網頁介面（見下方「前端」），瀏覽器連上去就能選圖片測試
 
 ## 專案結構
 
 ```
 src/
-  core/        text_det / text_rec 共用 OCR 邏輯 (demo 與 api_server 共用同一份)
-  demo/        main.cpp - GUI 互動式 demo
+  core/        text_det / text_rec 共用 OCR 邏輯
   api_server/  main.cpp - HTTP API server (POST /ocr_detect, POST /ocr_recognize)
 frontend/      Vue 3 + Vite 網頁前端，build 完由 api_server 一起服務（見下方）
-weights/       onnx 模型與字典 (demo、api_server 共用)
-images/        測試圖片 (僅 demo 使用)
+weights/       onnx 模型與字典
+images/        測試圖片，方便用 curl/Postman 手動測 API（見下方 api_server 使用方式）
 third_party/   httplib.h (api_server 用的單一標頭 HTTP 函式庫)
-vs2022/        Visual Studio 2022 解決方案 (.slnx + 兩個 .vcxproj)
+vs2022/        Visual Studio 2022 解決方案 (.slnx + api_server 的 .vcxproj)
 cmake/         CMakeLists.txt，供 VSCode (CMake Tools 擴充套件) 或其他 IDE 建置
 packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版控，見下方)
 ```
 
 ## 建置方式
 
-**Visual Studio 2022**：開啟 `vs2022/PaddleOCR-cpp.slnx`，裡面有 `demo` 與 `api_server` 兩個專案，選其一設為啟動專案即可 F5。
+**Visual Studio 2022**：開啟 `vs2022/PaddleOCR-cpp.slnx`，設 `api_server` 為啟動專案即可 F5；或直接執行 `vs2022/build_and_run.bat` 建置並啟動（不用開 VS GUI）。
 
-**VSCode / CMake**：安裝 CMake Tools 擴充套件，開啟資料夾後選擇 `cmake/CMakeLists.txt` 設定，會產生 `demo` 與 `api_server` 兩個 target。opencv/onnxruntime 路徑預設抓 `packages/` 下的資料夾，也可用 `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...` 覆寫。
+**VSCode / CMake**：安裝 CMake Tools 擴充套件，開啟資料夾後選擇 `cmake/CMakeLists.txt` 設定，會產生 `api_server` target。opencv/onnxruntime 路徑預設抓 `packages/` 下的資料夾，也可用 `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...` 覆寫。
 
-兩種方式都會在編譯後自動把 opencv/onnxruntime 的 DLL 與 `weights/`（demo 另外加 `images/`）複製到輸出目錄。
+兩種方式都會在編譯後自動把 opencv/onnxruntime 的 DLL 與 `weights/` 複製到輸出目錄。
 
 ## api_server 使用方式
 
@@ -143,7 +142,7 @@ Python環境設定
 
 修改程式
 
-- `src/demo/main.cpp`（GUI demo）或 `src/api_server/main.cpp`（API server）-
+- `src/api_server/main.cpp` -
 - TextDetector detect_model("det onnx model path");
 - TextRecognizer rec_model("rec onnx model path", "rec dict.txt path");
 

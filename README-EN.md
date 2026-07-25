@@ -8,33 +8,32 @@ A C++ inference implementation of PaddleOCR using onnxruntime and opencv, runnab
 1. Full-image detection (text location) + recognition (text content)
 2. Recognition on a selected ROI
 
-**Two ways to run it**
-1. `demo` - an interactive GUI console app with ROI selection, handy for running via Visual Studio F5 straight into `main()`
-2. `api_server` - a headless, long-running exe that exposes an HTTP API (`POST /ocr_detect`, `POST /ocr_recognize`) so other services can call OCR over the network
+`api_server` is a single long-running exe that provides both:
+- An HTTP API (`POST /ocr_detect`, `POST /ocr_recognize`) for other services to call
+- A built-in web UI (see Frontend below) — open it in a browser to try OCR on an image
 
 ## Project layout
 
 ```
 src/
-  core/        text_det / text_rec shared OCR logic (used by both demo and api_server)
-  demo/        main.cpp - interactive GUI demo
+  core/        text_det / text_rec shared OCR logic
   api_server/  main.cpp - HTTP API server (POST /ocr_detect, POST /ocr_recognize)
 frontend/      Vue 3 + Vite web UI; once built, it's served by api_server itself (see below)
-weights/       onnx models & dictionaries (shared by demo and api_server)
-images/        sample images (demo only)
+weights/       onnx models & dictionaries
+images/        sample images, handy for testing the API manually with curl/Postman (see "Using api_server")
 third_party/   httplib.h (single-header HTTP library used by api_server)
-vs2022/        Visual Studio 2022 solution (.slnx + two .vcxproj)
+vs2022/        Visual Studio 2022 solution (.slnx + api_server's .vcxproj)
 cmake/         CMakeLists.txt, for building via VSCode (CMake Tools extension) or any other IDE
 packages/      opencv / onnxruntime third-party SDKs (download yourself, not version-controlled, see below)
 ```
 
 ## Building
 
-**Visual Studio 2022**: open `vs2022/PaddleOCR-cpp.slnx`. It contains two projects, `demo` and `api_server` — pick one, set it as the startup project, and hit F5.
+**Visual Studio 2022**: open `vs2022/PaddleOCR-cpp.slnx`, set `api_server` as the startup project, and hit F5. Or just run `vs2022/build_and_run.bat`, which builds and launches it without opening the VS GUI.
 
-**VSCode / CMake**: install the CMake Tools extension, open the folder, and configure using `cmake/CMakeLists.txt`; this produces two targets, `demo` and `api_server`. The opencv/onnxruntime paths default to the folders under `packages/`, and can be overridden with `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...`.
+**VSCode / CMake**: install the CMake Tools extension, open the folder, and configure using `cmake/CMakeLists.txt`; this produces the `api_server` target. The opencv/onnxruntime paths default to the folders under `packages/`, and can be overridden with `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...`.
 
-Both build methods automatically copy the opencv/onnxruntime DLLs and `weights/` (plus `images/` for demo) into the output directory after building.
+Both build methods automatically copy the opencv/onnxruntime DLLs and `weights/` into the output directory after building.
 
 ## Using api_server
 
@@ -143,7 +142,7 @@ Python environment setup
 
 Code to edit
 
-- `src/demo/main.cpp` (GUI demo) or `src/api_server/main.cpp` (API server) -
+- `src/api_server/main.cpp` -
 - TextDetector detect_model("det onnx model path");
 - TextRecognizer rec_model("rec onnx model path", "rec dict.txt path");
 
