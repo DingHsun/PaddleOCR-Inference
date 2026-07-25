@@ -43,7 +43,7 @@ packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版�
 ### VSCode / CMake
 
 1. 安裝 **CMake Tools** 擴充套件（要偵錯的話還要裝 **C/C++** 擴充套件），開啟這個 repo 資料夾——`.vscode/settings.json` 已經設定 `cmake.sourceDirectory` 指向 `cmake/`，會自動抓到 `cmake/CMakeLists.txt`。
-2. **選組態（Debug/Release）**：VSCode 下方狀態列會有一個顯示目前組態的按鈕（例如 `[Debug]`），點它選 Debug；或 `Ctrl+Shift+P` → **CMake: Select Variant**。要偵錯的話**一定要選 Debug**，因為 `launch.json` 是寫死指向 Debug 版本的 exe。
+2. **選組態（Debug/Release）**：`Ctrl+Shift+P` → **CMake: Select Variant** 選 Debug（狀態列不一定有顯示組態按鈕，用這個指令最保險，也能拿來確認目前選的是 Debug 還是 Release）。要偵錯的話**一定要選 Debug**，因為 `launch.json` 是寫死指向 Debug 版本的 exe。
 3. 執行 **CMake: Build**（或狀態列的建置按鈕），會產生 `cmake/build/Debug/api_server.exe`，並自動複製 opencv/onnxruntime DLL、`weights/`（`frontend/dist` 有的話也會複製）到同一個資料夾。opencv/onnxruntime 路徑預設抓 `packages/` 下的資料夾，也可用 `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...` 覆寫。
 4. **偵錯**：按 **F5**，會直接套用專案裡的 `.vscode/launch.json`（`cppvsdbg` debugger，對應 MSVC 編譯出的 pdb），不會再跳「Select debugger」的選單，中斷點可以正常打。
 

@@ -43,7 +43,7 @@ So whether you Rebuild or hit F5, `api_server.exe` pops up running on its own af
 ### VSCode / CMake
 
 1. Install the **CMake Tools** extension (and the **C/C++** extension if you want to debug), then open this repo folder — `.vscode/settings.json` already sets `cmake.sourceDirectory` to `cmake/`, so it picks up `cmake/CMakeLists.txt` automatically.
-2. **Pick a build variant (Debug/Release)**: the VSCode status bar has a button showing the current variant (e.g. `[Debug]`) — click it to choose Debug; or `Ctrl+Shift+P` → **CMake: Select Variant**. Pick **Debug** if you plan to debug — `launch.json` points at the Debug build's exe specifically.
+2. **Pick a build variant (Debug/Release)**: `Ctrl+Shift+P` → **CMake: Select Variant** and choose Debug (the status bar doesn't always show a variant button, so this command is the reliable way — it also tells you which one is currently active). Pick **Debug** if you plan to debug — `launch.json` points at the Debug build's exe specifically.
 3. Run **CMake: Build** (or the build button in the status bar). This produces `cmake/build/Debug/api_server.exe` and automatically copies the opencv/onnxruntime DLLs, `weights/` (and `frontend/dist`, if present) into the same folder. The opencv/onnxruntime paths default to the folders under `packages/`, and can be overridden with `-DOPENCV_DIR=...` / `-DONNXRUNTIME_DIR=...`.
 4. **Debugging**: hit **F5** — it uses the project's `.vscode/launch.json` directly (`cppvsdbg`, matching the PDBs MSVC produces), so you won't see the "Select debugger" picker, and breakpoints work normally.
 
