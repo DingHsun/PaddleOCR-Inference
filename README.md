@@ -27,9 +27,32 @@ cmake/         CMakeLists.txt，供 VSCode (CMake Tools 擴充套件) 或其他 
 packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版控，見下方)
 ```
 
+## 前端 (frontend)
+
+`frontend/` 是一個 Vue 3 + Vite 網頁，提供選圖片 + Detect/Recognize 按鈕（畫面上會把偵測到的文字框疊在圖片上）。它不是獨立的 web app——build 出來的靜態檔案由 `api_server` 用 httplib 的 `set_mount_point()` 一起服務，同一個 port 就能連到網頁跟 API，不用另外架站、也不用處理 CORS。
+
+**開發時**（前後端分開跑，方便改介面即時看到變化）：
+```bash
+cd frontend
+npm install
+npm run dev
+```
+`vite.config.js` 已經設定 dev proxy，把 `/health`、`/ocr_detect`、`/ocr_recognize` 轉發到 `http://127.0.0.1:8080`（`api_server.exe` 要先另外啟動），瀏覽器連 Vite 印出來的網址（預設 `http://localhost:5173`）就能用。
+
+**要讓 `api_server.exe` 自己就能服務網頁**（正式使用/打包時）：
+```bash
+cd frontend
+npm run build
+```
+會產生 `frontend/dist`。之後編譯 `api_server`（VS2022 或 CMake）時，build script 會自動把 `frontend/dist` 複製到輸出目錄旁邊；`api_server.exe` 啟動後直接用瀏覽器連 `http://127.0.0.1:8080/` 就會看到網頁介面，不需要另外開 `npm run dev`。
+
+> ⚠️ 這步驟要在下面「建置方式」**之前**先做好，兩種建置方式都只會複製當下已經存在的 `frontend/dist`，不會自動幫你 build 前端。
+
 ## 建置方式
 
 ### Visual Studio 2022
+
+> 開始之前確認 `frontend/dist` 已經 build 好（見上方「前端」章節），不然 Post-Build Event 複製的時候會找不到它，網頁介面就不會被打包進輸出目錄。
 
 開啟 `vs2022/PaddleOCR-cpp.slnx`，在方案總管對 `api_server` 專案按右鍵 → **重建(Rebuild)**（或直接建置）。
 
@@ -41,6 +64,8 @@ packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版�
 也就是不管按重建方案還是直接 F5，建置完 `api_server.exe` 就會自己彈出來跑，不用手動找 exe 執行。
 
 ### VSCode / CMake
+
+> 開始之前確認 `frontend/dist` 已經 build 好（見上方「前端」章節）。這點對 CMake 更重要：`frontend/dist` 要在**第一次 `cmake` configure 之前**就存在，複製它的那個 build 步驟才會被加進去；如果先 configure 了才回頭 build 前端，要重新 **CMake: Delete Cache and Reconfigure** 一次它才會生效。
 
 1. 安裝 **CMake Tools** 擴充套件（要偵錯的話還要裝 **C/C++** 擴充套件），開啟這個 repo 資料夾——`.vscode/settings.json` 已經設定 `cmake.sourceDirectory` 指向 `cmake/`，會自動抓到 `cmake/CMakeLists.txt`。
 2. **選組態（Debug/Release）**：`Ctrl+Shift+P` → **CMake: Select Variant** 選 Debug（狀態列不一定有顯示組態按鈕，用這個指令最保險，也能拿來確認目前選的是 Debug 還是 Release）。要偵錯的話**一定要選 Debug**，因為 `launch.json` 是寫死指向 Debug 版本的 exe。
@@ -108,27 +133,6 @@ body 格式不對時（例如送 JSON 或 form-data）server 會回 HTTP 400，�
   "hint": "body must be the raw image bytes (jpg/png/bmp/...), not form-data or base64, e.g. curl -H \"Content-Type: application/octet-stream\" --data-binary @file.jpg"
 }
 ```
-
-## 前端 (frontend)
-
-`frontend/` 是一個 Vue 3 + Vite 網頁，提供選圖片 + Detect/Recognize 按鈕（畫面上會把偵測到的文字框疊在圖片上）。它不是獨立的 web app——build 出來的靜態檔案由 `api_server` 用 httplib 的 `set_mount_point()` 一起服務，同一個 port 就能連到網頁跟 API，不用另外架站、也不用處理 CORS。
-
-**開發時**（前後端分開跑，方便改介面即時看到變化）：
-```bash
-cd frontend
-npm install
-npm run dev
-```
-`vite.config.js` 已經設定 dev proxy，把 `/health`、`/ocr_detect`、`/ocr_recognize` 轉發到 `http://127.0.0.1:8080`（`api_server.exe` 要先另外啟動），瀏覽器連 Vite 印出來的網址（預設 `http://localhost:5173`）就能用。
-
-**要讓 `api_server.exe` 自己就能服務網頁**（正式使用/打包時）：
-```bash
-cd frontend
-npm run build
-```
-會產生 `frontend/dist`。之後編譯 `api_server`（VS2022 或 CMake）時，build script 會自動把 `frontend/dist` 複製到輸出目錄旁邊；`api_server.exe` 啟動後直接用瀏覽器連 `http://127.0.0.1:8080/` 就會看到網頁介面，不需要另外開 `npm run dev`。
-
-> 注意：如果是用 CMake，`frontend/dist` 要在**第一次 `cmake` configure 之前**先 build 好，這個複製步驟才會被加進 build 流程；先 build 前端、之後才 build C++ 專案的順序照做就沒問題。
 
 ## C++ Packages
 

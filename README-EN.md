@@ -27,9 +27,32 @@ cmake/         CMakeLists.txt, for building via VSCode (CMake Tools extension) o
 packages/      opencv / onnxruntime third-party SDKs (download yourself, not version-controlled, see below)
 ```
 
+## Frontend
+
+`frontend/` is a Vue 3 + Vite web page: pick an image, hit Detect/Recognize, and the detected text boxes get drawn on top of the image. It isn't a standalone web app — the built static files are served by `api_server` itself via httplib's `set_mount_point()`, so the page and the API share the same port, with no separate server and no CORS to deal with.
+
+**While developing** (frontend and backend run separately, so UI edits show up instantly):
+```bash
+cd frontend
+npm install
+npm run dev
+```
+`vite.config.js` already proxies `/health`, `/ocr_detect`, `/ocr_recognize` to `http://127.0.0.1:8080` (start `api_server.exe` separately). Open the URL Vite prints (default `http://localhost:5173`).
+
+**To have `api_server.exe` serve the page itself** (for regular use / packaging):
+```bash
+cd frontend
+npm run build
+```
+This produces `frontend/dist`. When `api_server` is then built (VS2022 or CMake), the build script copies `frontend/dist` next to the output exe automatically; open `http://127.0.0.1:8080/` in a browser and the web UI is right there — no `npm run dev` needed.
+
+> ⚠️ Do this **before** the "Building" section below — both build methods only copy whatever `frontend/dist` already exists; neither one builds the frontend for you.
+
 ## Building
 
 ### Visual Studio 2022
+
+> Before you start, make sure `frontend/dist` is already built (see Frontend above) — otherwise the Post-Build Event won't find it to copy, and the web UI won't end up in the output directory.
 
 Open `vs2022/PaddleOCR-cpp.slnx`, right-click the `api_server` project in Solution Explorer → **Rebuild** (or just Build).
 
@@ -41,6 +64,8 @@ Building it automatically triggers (configured in `api_server.vcxproj`):
 So whether you Rebuild or hit F5, `api_server.exe` pops up running on its own after the build — no need to hunt down the exe and launch it manually.
 
 ### VSCode / CMake
+
+> Before you start, make sure `frontend/dist` is already built (see Frontend above). This matters more for CMake: `frontend/dist` needs to exist **before the first `cmake` configure** for the copy step to be added at all; if you build the frontend after already configuring, run **CMake: Delete Cache and Reconfigure** once for it to take effect.
 
 1. Install the **CMake Tools** extension (and the **C/C++** extension if you want to debug), then open this repo folder — `.vscode/settings.json` already sets `cmake.sourceDirectory` to `cmake/`, so it picks up `cmake/CMakeLists.txt` automatically.
 2. **Pick a build variant (Debug/Release)**: `Ctrl+Shift+P` → **CMake: Select Variant** and choose Debug (the status bar doesn't always show a variant button, so this command is the reliable way — it also tells you which one is currently active). Pick **Debug** if you plan to debug — `launch.json` points at the Debug build's exe specifically.
@@ -108,27 +133,6 @@ When the body isn't in the right format (e.g. JSON or form-data), the server res
   "hint": "body must be the raw image bytes (jpg/png/bmp/...), not form-data or base64, e.g. curl -H \"Content-Type: application/octet-stream\" --data-binary @file.jpg"
 }
 ```
-
-## Frontend
-
-`frontend/` is a Vue 3 + Vite web page: pick an image, hit Detect/Recognize, and the detected text boxes get drawn on top of the image. It isn't a standalone web app — the built static files are served by `api_server` itself via httplib's `set_mount_point()`, so the page and the API share the same port, with no separate server and no CORS to deal with.
-
-**While developing** (frontend and backend run separately, so UI edits show up instantly):
-```bash
-cd frontend
-npm install
-npm run dev
-```
-`vite.config.js` already proxies `/health`, `/ocr_detect`, `/ocr_recognize` to `http://127.0.0.1:8080` (start `api_server.exe` separately). Open the URL Vite prints (default `http://localhost:5173`).
-
-**To have `api_server.exe` serve the page itself** (for regular use / packaging):
-```bash
-cd frontend
-npm run build
-```
-This produces `frontend/dist`. When `api_server` is then built (VS2022 or CMake), the build script copies `frontend/dist` next to the output exe automatically; open `http://127.0.0.1:8080/` in a browser and the web UI is right there — no `npm run dev` needed.
-
-> Note: with CMake, `frontend/dist` needs to exist **before the first `cmake` configure** for this copy step to be added to the build. Build the frontend first, then the C++ project, and you're fine.
 
 ## C++ Packages
 
