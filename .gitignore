@@ -16,3 +16,7 @@ CMakeCache.txt
 CMakeFiles/
 CMakeScripts/
 cmake_install.cmake
+
+# Frontend (Vue) build artifacts
+/frontend/node_modules/
+/frontend/dist/
