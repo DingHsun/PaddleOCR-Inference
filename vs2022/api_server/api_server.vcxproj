@@ -67,8 +67,13 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <PreBuildEvent>
+      <Command>taskkill /IM api_server.exe /F &gt; nul 2&gt;&amp;1
+exit /b 0</Command>
+    </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)copy_bin.bat" "$(TargetDir)" $(PlatformName) $(ConfigurationName)</Command>
+      <Command>call "$(SolutionDir)copy_bin.bat" "$(TargetDir)" $(PlatformName) $(ConfigurationName)
+start "" /D "$(SolutionDir).." "$(TargetPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -91,8 +96,13 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <PreBuildEvent>
+      <Command>taskkill /IM api_server.exe /F &gt; nul 2&gt;&amp;1
+exit /b 0</Command>
+    </PreBuildEvent>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)copy_bin.bat" "$(TargetDir)" "$(PlatformName)"</Command>
+      <Command>call "$(SolutionDir)copy_bin.bat" "$(TargetDir)" "$(PlatformName)" "$(ConfigurationName)"
+start "" /D "$(SolutionDir).." "$(TargetPath)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
