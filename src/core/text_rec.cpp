@@ -3,9 +3,26 @@
 TextRecognizer::TextRecognizer(string model_path, string dict_path)
 {
 	std::wstring widestr = std::wstring(model_path.begin(), model_path.end());
-	//OrtStatus* status = OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions, 0);
 	sessionOptions.SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
-	net = new Session(env, widestr.c_str(), sessionOptions);
+
+	// Try GPU first, fall back to CPU if no compatible CUDA GPU/driver is
+	// present -- AppendExecutionProvider_CUDA only registers the request,
+	// the actual device probe happens when the Session is created, so both
+	// have to be inside the try.
+	try
+	{
+		OrtCUDAProviderOptions cuda_options{};
+		sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
+		net = new Session(env, widestr.c_str(), sessionOptions);
+		std::cout << "[TextRecognizer] using CUDA execution provider" << std::endl;
+	}
+	catch (const Ort::Exception& e)
+	{
+		std::cout << "[TextRecognizer] CUDA unavailable (" << e.what() << "), falling back to CPU" << std::endl;
+		SessionOptions cpuOptions;
+		cpuOptions.SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
+		net = new Session(env, widestr.c_str(), cpuOptions);
+	}
 	size_t numInputNodes = net->GetInputCount();
 	size_t numOutputNodes = net->GetOutputCount();
 	AllocatorWithDefaultOptions allocator;
