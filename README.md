@@ -5,10 +5,12 @@
 PaddleOCR 的 C++ 推理實作，使用 onnxruntime 與 opencv，可運行 Windows x64 版本。
 
 **提供兩種 OCR 功能**
+
 1. 全圖識別（文字位置＋文字內容）
 2. 選擇 ROI 範圍進行辨識
 
 `api_server` 是一個常駐 exe，同時提供：
+
 - HTTP API（`POST /ocr_detect`、`POST /ocr_recognize`）給其他服務呼叫
 - 內建的網頁介面（見下方「前端」），瀏覽器連上去就能選圖片測試
 
@@ -36,18 +38,22 @@ packages/      opencv / onnxruntime 第三方 SDK (需自行下載，不進版�
 `frontend/` 是一個 Vue 3 + Vite 網頁，提供選圖片 + Detect/Recognize 按鈕（畫面上會把偵測到的文字框疊在圖片上）。它不是獨立的 web app——build 出來的靜態檔案由 `api_server` 用 httplib 的 `set_mount_point()` 一起服務，同一個 port 就能連到網頁跟 API，不用另外架站、也不用處理 CORS。
 
 **開發時**（前後端分開跑，方便改介面即時看到變化）：
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
 `vite.config.js` 已經設定 dev proxy，把 `/health`、`/ocr_detect`、`/ocr_recognize` 轉發到 `http://127.0.0.1:8080`（`api_server.exe` 要先另外啟動），瀏覽器連 Vite 印出來的網址（預設 `http://localhost:5173`）就能用。
 
 **要讓 `api_server.exe` 自己就能服務網頁**（正式使用/打包時）：
+
 ```bash
 cd frontend
 npm run build
 ```
+
 會產生 `frontend/dist`。之後編譯 `api_server`（VS2022 或 CMake）時，build script 會自動把 `frontend/dist` 複製到輸出目錄旁邊；`api_server.exe` 啟動後直接用瀏覽器連 `http://127.0.0.1:8080/` 就會看到網頁介面，不需要另外開 `npm run dev`。
 
 > ⚠️ 這步驟要在下面「建置方式」**之前**先做好，兩種建置方式都只會複製當下已經存在的 `frontend/dist`，不會自動幫你 build 前端。
@@ -61,6 +67,7 @@ npm run build
 開啟 `vs2022/PaddleOCR-cpp.slnx`，在方案總管對 `api_server` 專案按右鍵 → **重建(Rebuild)**（或直接建置）。
 
 建置完成會自動觸發（設定在 `api_server.vcxproj` 裡）：
+
 1. **Pre-Build Event**：`taskkill` 關掉還在跑的舊 `api_server.exe`（避免 exe 檔案被佔用導致 link 失敗）
 2. 編譯
 3. **Post-Build Event**：呼叫 `copy_bin.bat`，把 opencv/onnxruntime 的 DLL 跟 `weights/`（如果 `frontend/dist` 存在也一併）複製到輸出目錄 `vs2022/x64/<Debug|Release>/`，接著自動 `start` 啟動剛編譯好的 `api_server.exe`
@@ -151,11 +158,19 @@ body 格式不對時（例如送 JSON 或 form-data）server 會回 HTTP 400，�
 ## 模型選擇 (轉 .onnx)
 
 PP-OCR系列模型列表
+
 - [官方模型列表](http://www.paddleocr.ai/latest/version3.x/module_usage/module_overview.html)
 
+安裝 MSVC 執行庫
+
+- 下載並安裝官方最新版的 Visual C++ Redistributable (x64)：
+  下載連結：https://aka.ms/vs/17/release/vc_redist.x64.exe
+
 Python環境設定
+
 - python 3.10.10
-- pip install paddle2onnx-2.0.2rc3
+- pip install paddlepaddle==3.1.1
+- pip install paddle2onnx==2.1.0
 - 下載推理模型並解壓縮
 - 執行以下指令將model轉onnx並放置到下列路徑(放置路徑 ./weights/)，自行修改路徑
 - C:\Python31010-OCR-2onnx\Scripts\paddle2onnx.exe --model_dir "C:\Users\Users\Downloads\en_PP-OCRv5_mobile_rec_infer\en_PP-OCRv5_mobile_rec_infer" --model_filename inference.json --params_filename inference.pdiparams --save_file "C:\Users\Users\Downloads\en_PP-OCRv5_mobile_rec_infer\en_PP-OCRv5_mobile_rec_infer\model.onnx"
@@ -170,12 +185,12 @@ Python環境設定
 
 範例：PP-OCRv6_medium_rec
 
-1. 下載推理模型並執行轉 .onnx 步驟  [https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2]
+1. 下載推理模型並執行轉 .onnx 步驟 [https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2]
    | [模型網址](https://www.paddleocr.ai/latest/version3.x/module_usage/text_detection.html#_2) |
    | :---: |
    | <img width="1084" height="692" alt="image" src="https://github.com/user-attachments/assets/b5f3e947-4b70-4580-9031-3656b2e57369" /> |
 
-2. 尋找 .yml 檔案中的 character_dict_path 下載 recognition 需要的 dict.txt  [https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml]
+2. 尋找 .yml 檔案中的 character_dict_path 下載 recognition 需要的 dict.txt [https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml]
    | [檔案網址](https://github.com/PaddlePaddle/PaddleOCR/blob/main/configs/rec/PP-OCRv6/PP-OCRv6_medium_rec.yml) |
    | :---: |
    | <img width="1113" height="766" alt="image" src="https://github.com/user-attachments/assets/a80119e7-5dca-47a5-80e2-ff2afa1f37a8" /> |
